@@ -108,7 +108,7 @@ var Etsy = (function() {
 			beforeSend: function(){
 				$('#show_waiting_message').css({
 					display: 'block',
-					left: ($(window).width() - $('#show_waiting_message').outerWidth())/2,
+					left: ($(window).width() - $('#show_waiting_message').outerWidth())/2 - 50,
 					top: ($(window).height() - $('#show_waiting_message').outerHeight())/2
 				});
 			}
