@@ -179,6 +179,7 @@ body {
 }
  
 #results {
+	min-height: 600px;
 	text-align: center;
 	opacity: 0;
 }
@@ -226,7 +227,7 @@ body {
  
 .title {
 	display: block;
-	font: italic bold 15px/20px Georgia, serif;
+	font: italic bold 14px/20px Georgia, serif;
 	text-align: center;
 	margin-top: 5px;
 	color: #0B615E; }
