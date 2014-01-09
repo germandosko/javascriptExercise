@@ -123,7 +123,6 @@ var EventHandlers = (function(){
 	 * Setup all event listeners
 	 */
 	myEvents.StartListening = function (){
-		showResults();
 		showActivateButtons();
 		$('#search_button').click(myEvents.Search);
 		$('.prev').click(myEvents.Preview);
@@ -135,7 +134,6 @@ var EventHandlers = (function(){
 	 * Setup all result event listeners
 	 */
 	myEvents.StartListeningResults = function (){
-		showResults();
 		showActivateButtons();
 		$('a.option_view').click(myEvents.ShowProduct);
 		$('a.option_delete').click(myEvents.DeleteProduct);
@@ -182,7 +180,6 @@ var EventHandlers = (function(){
 	myEvents.Next = function (){		
         hiddenResults();
         myEvents.ScrollPage();   
-		console.log(Etsy.getPage());
 		var page = Etsy.getPage();
 		page += 1;
 		Etsy.setPage(page);
@@ -204,17 +201,17 @@ var EventHandlers = (function(){
 	var hiddenResults = function (){		
 		$('#results').animate({
 			opacity: 0
-		}, 2000, function() {
+		}, 1000, function() {
 		});
 	};
 
 	/**
 	 * show the results 
 	 */
-	var showResults = function (){		
+	myEvents.showResults = function (){		
 		$('#results').animate({
 			opacity: 1
-		}, 2000, function() {
+		}, 1000, function() {
 		});
 	};
 
@@ -266,6 +263,48 @@ var EventHandlers = (function(){
 	};
 
 	return myEvents;
+})();
+
+var Templates = (function(){
+	var myTemplate = {}
+	var ItemPrefix = "prod_";
+
+	myTemplate.showProduct = function(data){
+		for(p in data.results){
+			if(data.results[p].listing_id == Etsy.getId()){
+				var product = data.results[p];
+			}
+		}
+		var source   = $("#show_product_template").html();
+		var template = Handlebars.compile(source);
+		var context = {
+			image: product.Images[0].url_170x135,
+			title: product.title,
+			description: product.description,
+			featured_rank: product.featured_rank,
+			views: product.views,
+			price: product.price,
+			currency_code: product.currency_code
+		}
+		var html = template(context);
+		return html;
+	}
+
+	myTemplate.showResult = function(product){
+		var source   = $("#products_result_template").html();
+		var template = Handlebars.compile(source);
+		var context = {
+			listing_id: ItemPrefix + product.listing_id,
+			image: product.Images[0].url_170x135,
+			title: product.title.substring(0,17),
+			description: product.description.substring(0,55),
+			price: product.price,
+			currency_code: product.currency_code
+		}
+		var html = template(context);
+		return html;
+	}
+	return myTemplate;
 })();
 
 var Etsy = (function() {
@@ -374,7 +413,17 @@ var Etsy = (function() {
 		$.ajax({
 			url: GetQueryUrl(),
 			dataType: 'jsonp',
-			success: View.ShowResults
+			success: View.ShowResults,
+			beforeSend: function(){
+				$('#show_waiting_message').css({
+					display: 'block',
+					left: ($(window).width() - $('#show_waiting_message').outerWidth())/2 - 50,
+					top: ($(window).height() - $('#show_waiting_message').outerHeight())/2
+				});
+			}
+		}).done(function(){
+			EventHandlers.showResults();
+			$('#show_waiting_message').css('display','none');
 		});
 	}
 
@@ -382,11 +431,21 @@ var Etsy = (function() {
 	 * Performs a request to the API and find product by Id
 	 * @param {Number} Id to Search
 	 */
+
 	myEtsy.RequestById = function() {	
 		$.ajax({
 			url: GetQueryUrl(),
 			dataType: 'jsonp',
-			success: View.ShowProduct
+			success: View.ShowProduct,
+			beforeSend: function(){
+				$('#show_waiting_message').css({
+					display: 'block',
+					left: ($(window).width() - $('#show_waiting_message').outerWidth())/2,
+					top: window.scrollY + 250,
+				});
+			}
+		}).done(function(){
+			$('#show_waiting_message').css('display','none');
 		});
 	}
 
